@@ -12,10 +12,10 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            generator: "Visual Studio 17 2022"
+            generator_arg: "" # let CMake auto-detect whatever VS is installed
             artifact_name: SkyVerb-Windows-VST3
           - os: macos-latest
-            generator: "Xcode"
+            generator_arg: "-G Xcode"
             artifact_name: SkyVerb-macOS-VST3
 
     runs-on: ${{ matrix.os }}
@@ -28,7 +28,7 @@ jobs:
         run: git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git
 
       - name: Configure (CMake)
-        run: cmake -B build -G "${{ matrix.generator }}"
+        run: cmake -B build ${{ matrix.generator_arg }}
 
       - name: Build the VST3 (Release)
         run: cmake --build build --config Release --target BigSkyClone_VST3
