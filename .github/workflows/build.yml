@@ -1,0 +1,40 @@
+name: Build VST3
+
+# Runs automatically on every push, and can also be triggered manually
+# from the Actions tab ("Run workflow" button).
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            generator: "Visual Studio 17 2022"
+            artifact_name: SkyVerb-Windows-VST3
+          - os: macos-latest
+            generator: "Xcode"
+            artifact_name: SkyVerb-macOS-VST3
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out this project
+        uses: actions/checkout@v4
+
+      - name: Clone JUCE
+        run: git clone --depth 1 --branch 7.0.12 https://github.com/juce-framework/JUCE.git
+
+      - name: Configure (CMake)
+        run: cmake -B build -G "${{ matrix.generator }}"
+
+      - name: Build the VST3 (Release)
+        run: cmake --build build --config Release --target BigSkyClone_VST3
+
+      - name: Upload the built .vst3
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: build/BigSkyClone_artefacts/Release/VST3/*
